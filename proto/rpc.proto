@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package gravinterview;
+
+option go_package = "/;gravi";
+
+service GameServer {
+    rpc SayHello (RpcRequest) returns (RpcResponse) {}
+
+    rpc InitiateGame (RpcRequest) returns (RpcResponse) {}
+
+    rpc MakeAMove (RpcRequest) returns (RpcResponse) {}
+
+    rpc JoinGame (RpcRequest) returns (RpcResponse) {}
+
+    rpc CheckGameStatus (RpcRequest) returns (RpcResponse) {}
+}
+
+enum RpcType{
+    HellowWorld = 0;
+    CreateGame = 1;
+    JoinGame = 2;
+    OccupyPosition = 3;
+    CheckGameResult = 4;
+}
+
+enum RpcStatus {
+    NoError = 0;
+    UnknownStatus = 1;
+
+    //feel free to define your own error code
+}
+
+message RpcRequest {
+    RpcType rpcType = 1;
+
+    HelloWorldRequest helloWorldRequest = 10;
+    CreateGameRequest createGameRequest = 11;
+    JoinGameRequest joinGameRequest = 12;
+    OccupyPositionRequest occupyPositionRequest = 13;
+    CheckGameResultRequest checkGameResultRequest = 14;
+}
+
+message RpcResponse {
+    RpcStatus status = 1;
+
+    HellowWorldResponse hellowWorldResponse = 10;
+    CreateGameResponse createGameResponse = 11;
+    JoinGameResponse joinGameResponse = 12;
+    OccupyPositionResponse occupyPositionResponse = 13;
+    CheckGameResultResponse checkGameResultResponse = 14;
+}
+
+
+message HelloWorldRequest {
+    string greetingMessage = 1;
+}
+
+message HellowWorldResponse {
+    string returnedMessage = 1;
+}
+
+message CreateGameRequest {
+    string userId = 1;
+}
+
+message CreateGameResponse {
+    string gameId = 1;
+}
+
+message JoinGameRequest {
+    string userId = 1;
+    string gameId = 2;
+}
+
+enum JoinResult {
+    JoinSuccess = 0;
+    NoGame = 1;
+    GameFinished = 2;
+    GameIsFull = 3;
+}
+
+message JoinGameResponse {
+    JoinResult result = 1;
+}
+
+message OccupyPositionRequest {
+    string gameId = 1;
+    string userId = 2;
+    int32 x = 3;
+    int32 y = 4;
+}
+
+enum OccupyResult {
+    OccupySuccess = 0;
+    HasBeenTaken = 1;
+    InvalidPosition = 2;
+    NotYourTurn = 3;
+    InvalidGame = 4;
+    NotAPlayer = 5;
+}
+
+enum GameResult {
+    WaitMoreJoin = 0;
+    Ongoing = 1;
+    Win = 2;
+    Draw = 3;
+    Lose = 4;
+}
+
+message OccupyPositionResponse {
+    OccupyResult occupyResult = 1;
+}
+
+message CheckGameResultRequest {
+    string gameId = 1;
+}
+
+message CheckGameResultResponse {
+    GameResult gameResult = 1;
+}
