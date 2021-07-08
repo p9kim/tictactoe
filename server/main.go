@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	gravi "github.com/p9kim/ticcytac/proto"
+	tictac "github.com/p9kim/ticcytac/proto"
 	"google.golang.org/grpc"
 
 	"github.com/teris-io/shortid"
@@ -42,17 +42,17 @@ func newBoard() *board {
 
 var ongoingGames = make(map[string]*board)
 
-func (s *Server) SayHello(ctx context.Context, req *gravi.RpcRequest) (*gravi.RpcResponse, error) {
+func (s *Server) SayHello(ctx context.Context, req *tictac.RpcRequest) (*tictac.RpcResponse, error) {
 	log.Printf("Message received from client: %s", req.HelloWorldRequest.GreetingMessage)
-	res := gravi.RpcResponse{
-		HellowWorldResponse: &gravi.HellowWorldResponse{
+	res := tictac.RpcResponse{
+		HellowWorldResponse: &tictac.HellowWorldResponse{
 			ReturnedMessage: "Kenobi~!!! You are a BOLD ONE!",
 		},
 	}
 	return &res, nil
 }
 
-func (s *Server) InitiateGame(ctx context.Context, req *gravi.RpcRequest) (*gravi.RpcResponse, error) {
+func (s *Server) InitiateGame(ctx context.Context, req *tictac.RpcRequest) (*tictac.RpcResponse, error) {
 	log.Printf("Create Game Request ID: %s", req.CreateGameRequest.UserId)
 	gameBoard := newBoard()
 	gameBoard.gameID, _ = shortid.Generate()
@@ -60,8 +60,8 @@ func (s *Server) InitiateGame(ctx context.Context, req *gravi.RpcRequest) (*grav
 	gameBoard.players[gameBoard.player1id] = true
 	ongoingGames[gameBoard.gameID] = gameBoard
 
-	res := gravi.RpcResponse{
-		CreateGameResponse: &gravi.CreateGameResponse{
+	res := tictac.RpcResponse{
+		CreateGameResponse: &tictac.CreateGameResponse{
 			GameId: gameBoard.gameID,
 		},
 	}
@@ -69,34 +69,34 @@ func (s *Server) InitiateGame(ctx context.Context, req *gravi.RpcRequest) (*grav
 	return &res, nil
 }
 
-func (s *Server) JoinGame(ctx context.Context, req *gravi.RpcRequest) (*gravi.RpcResponse, error) {
+func (s *Server) JoinGame(ctx context.Context, req *tictac.RpcRequest) (*tictac.RpcResponse, error) {
 	log.Printf("Player %s joining game %s", req.JoinGameRequest.UserId, req.JoinGameRequest.GameId)
 
 	userid := req.JoinGameRequest.UserId
 	gameid := req.JoinGameRequest.GameId
 
-	var res gravi.RpcResponse
+	var res tictac.RpcResponse
 
 	if gameBoard, ok := ongoingGames[gameid]; ok {
 		if len(gameBoard.players) > maxPlayers {
-			res = gravi.RpcResponse{
-				JoinGameResponse: &gravi.JoinGameResponse{
-					Result: gravi.JoinResult_GameIsFull,
+			res = tictac.RpcResponse{
+				JoinGameResponse: &tictac.JoinGameResponse{
+					Result: tictac.JoinResult_GameIsFull,
 				},
 			}
 		} else {
 			gameBoard.player2id = userid
 			gameBoard.players[gameBoard.player2id] = false
-			res = gravi.RpcResponse{
-				JoinGameResponse: &gravi.JoinGameResponse{
-					Result: gravi.JoinResult_JoinSuccess,
+			res = tictac.RpcResponse{
+				JoinGameResponse: &tictac.JoinGameResponse{
+					Result: tictac.JoinResult_JoinSuccess,
 				},
 			}
 		}
 	} else {
-		res = gravi.RpcResponse{
-			JoinGameResponse: &gravi.JoinGameResponse{
-				Result: gravi.JoinResult_NoGame,
+		res = tictac.RpcResponse{
+			JoinGameResponse: &tictac.JoinGameResponse{
+				Result: tictac.JoinResult_NoGame,
 			},
 		}
 	}
@@ -104,7 +104,7 @@ func (s *Server) JoinGame(ctx context.Context, req *gravi.RpcRequest) (*gravi.Rp
 	return &res, nil
 }
 
-func (s *Server) MakeAMove(ctx context.Context, req *gravi.RpcRequest) (*gravi.RpcResponse, error) {
+func (s *Server) MakeAMove(ctx context.Context, req *tictac.RpcRequest) (*tictac.RpcResponse, error) {
 	log.Printf("Player %s occupies space [%d, %d]", req.OccupyPositionRequest.UserId,
 		req.OccupyPositionRequest.X, req.OccupyPositionRequest.Y)
 
@@ -113,27 +113,27 @@ func (s *Server) MakeAMove(ctx context.Context, req *gravi.RpcRequest) (*gravi.R
 	userid := req.OccupyPositionRequest.UserId
 	gameid := req.OccupyPositionRequest.GameId
 
-	var res gravi.RpcResponse
+	var res tictac.RpcResponse
 
 	// Ugly
 	if gameBoard, ok := ongoingGames[gameid]; ok {
 		if player, ok := gameBoard.players[userid]; ok {
 			if !player {
-				res = gravi.RpcResponse{
-					OccupyPositionResponse: &gravi.OccupyPositionResponse{
-						OccupyResult: gravi.OccupyResult_NotYourTurn,
+				res = tictac.RpcResponse{
+					OccupyPositionResponse: &tictac.OccupyPositionResponse{
+						OccupyResult: tictac.OccupyResult_NotYourTurn,
 					},
 				}
 			} else if x > 2 || y > 2 {
-				res = gravi.RpcResponse{
-					OccupyPositionResponse: &gravi.OccupyPositionResponse{
-						OccupyResult: gravi.OccupyResult_InvalidPosition,
+				res = tictac.RpcResponse{
+					OccupyPositionResponse: &tictac.OccupyPositionResponse{
+						OccupyResult: tictac.OccupyResult_InvalidPosition,
 					},
 				}
 			} else if gameBoard.spaces[x][y] != "" {
-				res = gravi.RpcResponse{
-					OccupyPositionResponse: &gravi.OccupyPositionResponse{
-						OccupyResult: gravi.OccupyResult_HasBeenTaken,
+				res = tictac.RpcResponse{
+					OccupyPositionResponse: &tictac.OccupyPositionResponse{
+						OccupyResult: tictac.OccupyResult_HasBeenTaken,
 					},
 				}
 			} else {
@@ -145,23 +145,23 @@ func (s *Server) MakeAMove(ctx context.Context, req *gravi.RpcRequest) (*gravi.R
 					gameBoard.players[gameBoard.player1id] = true
 					gameBoard.players[gameBoard.player2id] = false
 				}
-				res = gravi.RpcResponse{
-					OccupyPositionResponse: &gravi.OccupyPositionResponse{
-						OccupyResult: gravi.OccupyResult_OccupySuccess,
+				res = tictac.RpcResponse{
+					OccupyPositionResponse: &tictac.OccupyPositionResponse{
+						OccupyResult: tictac.OccupyResult_OccupySuccess,
 					},
 				}
 			}
 		} else {
-			res = gravi.RpcResponse{
-				OccupyPositionResponse: &gravi.OccupyPositionResponse{
-					OccupyResult: gravi.OccupyResult_NotAPlayer,
+			res = tictac.RpcResponse{
+				OccupyPositionResponse: &tictac.OccupyPositionResponse{
+					OccupyResult: tictac.OccupyResult_NotAPlayer,
 				},
 			}
 		}
 	} else {
-		res = gravi.RpcResponse{
-			OccupyPositionResponse: &gravi.OccupyPositionResponse{
-				OccupyResult: gravi.OccupyResult_InvalidGame,
+		res = tictac.RpcResponse{
+			OccupyPositionResponse: &tictac.OccupyPositionResponse{
+				OccupyResult: tictac.OccupyResult_InvalidGame,
 			},
 		}
 	}
@@ -169,31 +169,31 @@ func (s *Server) MakeAMove(ctx context.Context, req *gravi.RpcRequest) (*gravi.R
 	return &res, nil
 }
 
-func (s *Server) CheckGameStatus(ctx context.Context, req *gravi.RpcRequest) (*gravi.RpcResponse, error) {
+func (s *Server) CheckGameStatus(ctx context.Context, req *tictac.RpcRequest) (*tictac.RpcResponse, error) {
 	log.Printf("Checking Game Result: %s", req.CheckGameResultRequest.GameId)
 	gameid := req.CheckGameResultRequest.GameId
 	gameBoard := ongoingGames[gameid]
 
-	var res gravi.RpcResponse
+	var res tictac.RpcResponse
 
 	if len(gameBoard.players) < 2 {
-		res = gravi.RpcResponse{
-			CheckGameResultResponse: &gravi.CheckGameResultResponse{
-				GameResult: gravi.GameResult_WaitMoreJoin,
+		res = tictac.RpcResponse{
+			CheckGameResultResponse: &tictac.CheckGameResultResponse{
+				GameResult: tictac.GameResult_WaitMoreJoin,
 			},
 		}
 	} else {
 		if isFull(gameBoard.spaces) {
-			res = gravi.RpcResponse{
-				CheckGameResultResponse: &gravi.CheckGameResultResponse{
-					GameResult: gravi.GameResult_Draw,
+			res = tictac.RpcResponse{
+				CheckGameResultResponse: &tictac.CheckGameResultResponse{
+					GameResult: tictac.GameResult_Draw,
 				},
 			}
 			delete(ongoingGames, gameid)
 		} else {
-			res = gravi.RpcResponse{
-				CheckGameResultResponse: &gravi.CheckGameResultResponse{
-					GameResult: gravi.GameResult_Ongoing,
+			res = tictac.RpcResponse{
+				CheckGameResultResponse: &tictac.CheckGameResultResponse{
+					GameResult: tictac.GameResult_Ongoing,
 				},
 			}
 		}
@@ -226,7 +226,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	gravi.RegisterGameServerServer(grpcServer, &Server{})
+	tictac.RegisterGameServerServer(grpcServer, &Server{})
 
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatal(err)

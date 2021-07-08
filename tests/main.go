@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	gravi "github.com/p9kim/ticcytac/proto"
+	tictac "github.com/p9kim/ticcytac/proto"
 
 	"google.golang.org/grpc"
 )
@@ -17,14 +17,14 @@ func main() {
 
 	defer conn.Close()
 
-	client := gravi.NewGameServerClient(conn)
+	client := tictac.NewGameServerClient(conn)
 
 	// Ping
-	message := gravi.RpcRequest{
-		HelloWorldRequest: &gravi.HelloWorldRequest{
+	message := tictac.RpcRequest{
+		HelloWorldRequest: &tictac.HelloWorldRequest{
 			GreetingMessage: "Hello There~!",
 		},
-		RpcType: gravi.RpcType_HellowWorld,
+		RpcType: tictac.RpcType_HellowWorld,
 	}
 
 	res, err := client.SayHello(context.Background(), &message)
@@ -35,8 +35,8 @@ func main() {
 	log.Printf("Response from server: %s\n", res.HellowWorldResponse.ReturnedMessage)
 
 	// Create Game
-	createGameReq := gravi.RpcRequest{
-		CreateGameRequest: &gravi.CreateGameRequest{
+	createGameReq := tictac.RpcRequest{
+		CreateGameRequest: &tictac.CreateGameRequest{
 			UserId: "Paul",
 		},
 	}
@@ -49,8 +49,8 @@ func main() {
 	log.Printf("Game ID: %s", gameid)
 
 	// Make a move
-	occupyReq := gravi.RpcRequest{
-		OccupyPositionRequest: &gravi.OccupyPositionRequest{
+	occupyReq := tictac.RpcRequest{
+		OccupyPositionRequest: &tictac.OccupyPositionRequest{
 			UserId: "Paul",
 			GameId: gameid,
 			X:      1,
@@ -58,8 +58,8 @@ func main() {
 		},
 	}
 
-	occupyReq2 := gravi.RpcRequest{
-		OccupyPositionRequest: &gravi.OccupyPositionRequest{
+	occupyReq2 := tictac.RpcRequest{
+		OccupyPositionRequest: &tictac.OccupyPositionRequest{
 			UserId: "Paul",
 			GameId: gameid,
 			X:      1,
@@ -67,8 +67,8 @@ func main() {
 		},
 	}
 
-	occupyReq3 := gravi.RpcRequest{
-		OccupyPositionRequest: &gravi.OccupyPositionRequest{
+	occupyReq3 := tictac.RpcRequest{
+		OccupyPositionRequest: &tictac.OccupyPositionRequest{
 			UserId: "Paul",
 			GameId: gameid,
 			X:      4,

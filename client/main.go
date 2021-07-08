@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	gravi "github.com/p9kim/ticcytac/proto"
+	tictac "github.com/p9kim/ticcytac/proto"
 
 	"google.golang.org/grpc"
 )
@@ -24,7 +24,7 @@ func main() {
 
 	defer conn.Close()
 
-	client := gravi.NewGameServerClient(conn)
+	client := tictac.NewGameServerClient(conn)
 
 	// Create Game
 	userid := ""
@@ -42,8 +42,8 @@ func main() {
 			option := scanner.Text()
 			if option == "C" {
 				userid = "X"
-				createGameReq := gravi.RpcRequest{
-					CreateGameRequest: &gravi.CreateGameRequest{
+				createGameReq := tictac.RpcRequest{
+					CreateGameRequest: &tictac.CreateGameRequest{
 						UserId: userid,
 					},
 				}
@@ -57,8 +57,8 @@ func main() {
 			} else {
 				userid = "O"
 				gameid = option
-				joinGameReq := gravi.RpcRequest{
-					JoinGameRequest: &gravi.JoinGameRequest{
+				joinGameReq := tictac.RpcRequest{
+					JoinGameRequest: &tictac.JoinGameRequest{
 						UserId: userid,
 						GameId: gameid,
 					},
@@ -67,7 +67,7 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
-				if joinResult.JoinGameResponse.Result != gravi.JoinResult_JoinSuccess {
+				if joinResult.JoinGameResponse.Result != tictac.JoinResult_JoinSuccess {
 					fmt.Println("No game by this id")
 					break
 				} else {
@@ -78,8 +78,8 @@ func main() {
 		}
 		fmt.Println("Let's play!")
 		for scanner.Scan() {
-			checkGameReq := gravi.RpcRequest{
-				CheckGameResultRequest: &gravi.CheckGameResultRequest{
+			checkGameReq := tictac.RpcRequest{
+				CheckGameResultRequest: &tictac.CheckGameResultRequest{
 					GameId: gameid,
 				},
 			}
@@ -87,18 +87,18 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			if gameResult.CheckGameResultResponse.GameResult == gravi.GameResult_WaitMoreJoin {
+			if gameResult.CheckGameResultResponse.GameResult == tictac.GameResult_WaitMoreJoin {
 				fmt.Println("Wait for more 1 more player")
 				continue
-			} else if gameResult.CheckGameResultResponse.GameResult != gravi.GameResult_Ongoing {
+			} else if gameResult.CheckGameResultResponse.GameResult != tictac.GameResult_Ongoing {
 				fmt.Println("Game is over")
 			}
 
 			position := strings.Split(scanner.Text(), ",")
 			x, _ := strconv.Atoi(position[0])
 			y, _ := strconv.Atoi(position[1])
-			move := gravi.RpcRequest{
-				OccupyPositionRequest: &gravi.OccupyPositionRequest{
+			move := tictac.RpcRequest{
+				OccupyPositionRequest: &tictac.OccupyPositionRequest{
 					GameId: gameid,
 					UserId: userid,
 					X:      int32(x),
